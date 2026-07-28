@@ -20,6 +20,10 @@ params = [
     "Tackles Made", "Interceptions", "Recoveries", "Aerial Win %"
 ]
 
+# إعداد نطاقات القيم الدنيا والعليا لتتطابق تماماً مع عدد المؤشرات الـ 15
+min_range = [0] * len(params)
+max_range = [99] * len(params)
+
 # القوائم الجانبية لتعديل القيم بحرية
 st.sidebar.header("🔧 تعديل بيانات اللاعب")
 player_values = []
@@ -38,15 +42,15 @@ def load_image():
 fdj_cropped = load_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ Pizza Chart (نسخة مستقرة وآمنة)
+# 3. إعداد ورسم الـ Pizza Chart (مع تمرير النطاقات بداخلها)
 # ==========================================
 slice_colors = ["#1a4f7c"] * len(params)
 text_colors = ["#ffffff"] * len(params)
 
 baker = PyPizza(
     params=params,
-    min_range=0,
-    max_range=99,
+    min_range=min_range,
+    max_range=max_range,
     straight_line_color="#222222",
     straight_line_lw=1,
     last_circle_lw=1,
@@ -54,23 +58,21 @@ baker = PyPizza(
     inner_circle_size=20
 )
 
-# إنشاء الرسم بالمعاملات الأساسية المدعومة تماماً
+# إنشاء الرسم بالشكل الصحيح
 fig, ax = baker.make_pizza(
     player_values,
-    figsize=(8, 8),
+    figsize_square=8,
+    facecolor="#313332",
+    bg_color="#121212",
     slice_colors=slice_colors,
     value_colors=text_colors,
     kwargs_slices=dict(edgecolor="#121212", linewidth=2, zorder=2),
     kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center")
 )
 
-# تعيين خلفية الرسم
-fig.set_facecolor("#121212")
-ax.set_facecolor("#121212")
-
 # إضافة عنوان وشرح داخل الرسم
 fig.text(
-    0.51, 0.94, "Frenkie de Jong - Performance Pizza Chart", 
+    0.51, 0.97, "Frenkie de Jong - Performance Pizza Chart", 
     size=18, fontweight="bold", ha="center", color="#ffffff"
 )
 
