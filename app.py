@@ -17,7 +17,6 @@ st.sidebar.header("🖼️ تغيير صورة اللاعب")
 uploaded_file = st.sidebar.file_uploader("اختر صورة اللاعب (PNG أو JPG)", type=["png", "jpg", "jpeg"])
 
 st.sidebar.header("🔧 تعديل إحصائيات اللاعب")
-# تقليل عدد المؤشرات وجعل أسمائها مختصرة لعدم حدوث زحمة وتداخل
 params = [
     "Goals", "npxG", "xA", "SCA",
     "PA Entries", "Prog Passes", "Prog Carries", 
@@ -45,7 +44,7 @@ else:
     player_image = load_default_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ Radar بشكل مرتب وواضح
+# 3. إعداد ورسم الـ Radar (حافة حمراء للخط المتغير)
 # ==========================================
 radar = Radar(
     params, 
@@ -61,15 +60,15 @@ fig, ax = radar.setup_axis(figsize=(8, 8))
 # رسم دوائر الخلفية
 radar.draw_circles(ax=ax, facecolor='#1e1e1e', edgecolor='#ffd700', lw=0.5)
 
-# رسم إحصائيات اللاعب باللون الأزرق مع حدود صفراء ذهبية
+# رسم إحصائيات اللاعب: لون داخلي أزرق مع حافة باللون الأحمر ('#ff4d4d')
 radar.draw_radar(
     player_values, 
     ax=ax, 
-    kwargs_radar={'facecolor': '#1f77b4', 'alpha': 0.6, 'edgecolor': '#ffd700', 'lw': 1.5},
+    kwargs_radar={'facecolor': '#1f77b4', 'alpha': 0.6, 'edgecolor': '#ff4d4d', 'lw': 2.5},
     kwargs_rings={'facecolor': '#222222'}
 )
 
-# رسم التسميات والحدود مع ضبط حجم الخط ليكون غير متداخل
+# رسم التسميات والحدود بدون زحمة
 radar.draw_range_labels(ax=ax, fontsize=9, color='#ffd700')
 radar.draw_param_labels(ax=ax, fontsize=11, color='#ffd700', fontweight='bold')
 
