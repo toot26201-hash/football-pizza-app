@@ -2,7 +2,7 @@ import streamlit as st
 from urllib.request import urlopen
 from PIL import Image
 import matplotlib.pyplot as plt
-from mplsoccer import PyPizza, add_image, FontManager
+from mplsoccer import PyPizza
 
 # إعداد صفحة ستريملايت لتكون بعرض واسع
 st.set_page_config(page_title="Football Player Pizza Chart", layout="wide")
@@ -23,6 +23,10 @@ params = [
     "Progressive Carries", "Final 1/3 Passes", "Final 1/3 Carries", "Pressure Regains",
     "Tackles Made", "Interceptions", "Recoveries", "Aerial Win %"
 ]
+
+# تعريف النطاقات الدنيا والعليا لتتطابق تماماً مع عدد المؤشرات الـ 15
+min_range = [0] * len(params)
+max_range = [99] * len(params)
 
 player_values = []
 for param in params:
@@ -47,10 +51,11 @@ else:
 slice_colors = ["#1a4f7c"] * len(params)
 text_colors = ["#ffffff"] * len(params)
 
+# تمرير النطاقات بشكل صحيح داخل PyPizza لمنع الخطأ نهائياً
 baker = PyPizza(
     params=params,
-    min_range=0,
-    max_range=99,
+    min_range=min_range,
+    max_range=max_range,
     straight_line_color="#222222",
     straight_line_lw=1,
     last_circle_lw=1,
