@@ -2,12 +2,12 @@ import streamlit as st
 from urllib.request import urlopen
 from PIL import Image
 import matplotlib.pyplot as plt
-from mplsoccer import PyPizza
+from mplsoccer import Radar
 
 # إعداد صفحة ستريملايت لتكون بعرض واسع
-st.set_page_config(page_title="Football Player Pizza Chart", layout="wide")
+st.set_page_config(page_title="Football Player Radar Chart", layout="wide")
 
-st.title("⚽ تطبيق تحليل أداء اللاعبين (PyPizza)")
+st.title("⚽ تطبيق تحليل أداء اللاعبين")
 st.write("قم بتعديل إحصائيات اللاعب أو ارفع صورة جديدة من القائمة الجانبية!")
 
 # ==========================================
@@ -23,6 +23,9 @@ params = [
     "Prog Carries", "Final 1/3 Passes", "Final 1/3 Carries", "Pressure Regains",
     "Tackles", "Interceptions", "Recoveries", "Aerial Win %"
 ]
+
+low = [0] * len(params)
+high = [99] * len(params)
 
 player_values = []
 for param in params:
@@ -42,36 +45,38 @@ else:
     player_image = load_default_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ PyPizza Chart
+# 3. إعداد ورسم الـ Radar الآمن والمستقر
 # ==========================================
-baker = PyPizza(
-    params=params,
-    min_range=0,
-    max_range=99,
-    background_color="#121212",
-    straight_line_color="#222222",
-    straight_line_lw=1,
-    last_circle_lw=1,
-    other_circle_lw=0,
-    inner_circle_size=20
+radar = Radar(
+    params, 
+    low, 
+    high,
+    round_int=[False] * len(params),
+    num_rings=4, 
+    ring_width=1
 )
 
-# بناء الرسم بدون أي خصائص خطوط معقدة قد تسبب انهيار التطبيق
-fig, ax = baker.make_pizza(
-    player_values,
-    figsize=(8, 8),
-    color_blank_space="same",
-    slice_colors=["#1a4f7c"] * len(params),
-    value_colors=["#ffffff"] * len(params),
-    value_bck_colors=["#1a4f7c"] * len(params),
-    blank_alpha=0.4,
-    kwargs_slices=dict(edgecolor="#121212", linewidth=2)
+fig, ax = radar.setup_axis(figsize=(8, 8))
+
+# رسم دوائر الخلفية
+radar.draw_circles(ax=ax, facecolor='#222222', edgecolor='#333333')
+
+# رسم إحصائيات اللاعب
+radar.draw_radar(
+    player_values, 
+    ax=ax, 
+    kwargs_radar={'facecolor': '#1a4f7c', 'alpha': 0.6},
+    kwargs_rings={'facecolor': '#333333'}
 )
 
-fig.text(
-    0.51, 0.97, "Player Performance - Pizza Chart", 
-    size=18, fontweight="bold", ha="center", color="#ffffff"
-)
+# رسم التسميات والحدود
+radar.draw_range_labels(ax=ax, fontsize=10, color='#ffffff')
+radar.draw_param_labels(ax=ax, fontsize=12, color='#ffffff', fontweight='bold')
+
+# تنسيق الخلفية والعنوان
+fig.set_facecolor("#121212")
+ax.set_facecolor("#121212")
+plt.title("Player Performance Chart", fontsize=16, weight='bold', color='white', pad=20)
 
 # ==========================================
 # 4. عرض المحتوى في الواجهة
