@@ -43,7 +43,7 @@ fdj_cropped = load_image()
 slice_colors = ["#1a4f7c"] * len(params)
 text_colors = ["#ffffff"] * len(params)
 
-# إنشاء كائن البايزا بالشكل الأساسي السليم
+# إعداد كائن البايزا بالشكل السليم
 baker = PyPizza(
     params=params,
     straight_line_color="#222222",
@@ -53,7 +53,7 @@ baker = PyPizza(
     inner_circle_size=20
 )
 
-# رسم الـ Pizza بشكل مستقر وخالٍ من الأخطاء
+# رسم الـ Pizza بالشكل المتوافق تماماً مع الإصدارات الحديثة
 fig, ax = baker.make_pizza(
     player_values,
     figsize_square=8,
@@ -62,7 +62,9 @@ fig, ax = baker.make_pizza(
     slice_colors=slice_colors,
     value_colors=text_colors,
     kwargs_slices=dict(edgecolor="#121212", linewidth=2, zorder=2),
-    kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center")
+    kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center"),
+    kwargs_values=dict(color="#ffffff", fontsize=11, zorder=3,
+                       bbox=dict(edgecolor="#000000", facecolor="#1a4f7c", boxstyle="round,pad=0.2", lw=1))
 )
 
 # إضافة عنوان وشرح داخل الرسم
@@ -79,5 +81,5 @@ with col1:
 
 with col2:
     st.subheader("صورة اللاعب")
-    st.image(fdj_cropped, caption="Frenkie de Jong", use_column_width=True)
+    st.image(fdj_cropped, caption="Frenkie de Jong", use_container_width=True)
     st.info("💡 يمكنك التحكم في أرقام اللاعب وإحصائياته مباشرة من القائمة الجانبية (Sidebar).")
