@@ -8,11 +8,15 @@ from mplsoccer import Radar
 st.set_page_config(page_title="Football Player Radar Chart", layout="wide")
 
 st.title("⚽ تطبيق تحليل أداء اللاعبين (Radar Chart)")
-st.write("قم بتعديل قيم اللاعب من القائمة الجانبية وشاهد التغيير فوراً في الرسم البياني!")
+st.write("قم بتعديل قيم اللاعب وإحصائياته أو ارفع صورة جديدة من القائمة الجانبية!")
 
 # ==========================================
-# 1. إعداد البيانات والمعلمات (Params & Values)
+# 1. القائمة الجانبية (رفع الصورة + تعديل القيم)
 # ==========================================
+st.sidebar.header("🖼️ تغيير صورة اللاعب")
+uploaded_file = st.sidebar.file_uploader("اختر صورة (PNG أو JPG)", type=["png", "jpg", "jpeg"])
+
+st.sidebar.header("🔧 تعديل بيانات اللاعب")
 params = [
     "Goals", "npxG", "xA", "SCA",
     "PA Entries", "Touches/Turnover", "Prog Passes",
@@ -20,29 +24,32 @@ params = [
     "Tackles", "Interceptions", "Recoveries", "Aerial Win %"
 ]
 
-# إعداد الحدود الدنيا والعليا لكل مؤشر
 low = [0] * len(params)
 high = [99] * len(params)
 
-# القوائم الجانبية لتعديل القيم بحرية
-st.sidebar.header("🔧 تعديل بيانات اللاعب")
 player_values = []
 for param in params:
     val = st.sidebar.slider(f"{param}", 0, 99, 50)
     player_values.append(val)
 
 # ==========================================
-# 2. تحميل صورة اللاعب
+# 2. إدارة الصورة (المفروضة أو المرفوعة)
 # ==========================================
-@st.cache_resource
-def load_image():
-    URL = "https://raw.githubusercontent.com/andrewRowlinson/mplsoccer-assets/main/fdj_cropped.png"
-    return Image.open(urlopen(URL))
-
-fdj_cropped = load_image()
+if uploaded_file is not None:
+    # استخدام الصورة التي قام المستخدم برفعها
+    player_image = Image.open(uploaded_file)
+    image_caption = "الصورة المرفوعة"
+else:
+    # الصورة الافتراضية في حال لم يتم رفع شيء
+    @st.cache_resource
+    def load_default_image():
+        URL = "https://raw.githubusercontent.com/andrewRowlinson/mplsoccer-assets/main/fdj_cropped.png"
+        return Image.open(urlopen(URL))
+    player_image = load_default_image()
+    image_caption = "Frenkie de Jong (افتراضية)"
 
 # ==========================================
-# 3. إعداد ورسم الـ Radar بالشكل الصحيح 100%
+# 3. إعداد ورسم الـ Radar
 # ==========================================
 radar = Radar(
     params, 
@@ -58,7 +65,7 @@ fig, ax = radar.setup_axis(figsize=(8, 8))
 # رسم دوائر الخلفية
 radar.draw_circles(ax=ax, facecolor='#222222', edgecolor='#333333')
 
-# رسم الإحصائيات بالطريقة الصحيحة عبر kwargs_radar
+# رسم إحصائيات اللاعب
 radar.draw_radar(
     player_values, 
     ax=ax, 
@@ -66,17 +73,17 @@ radar.draw_radar(
     kwargs_rings={'facecolor': '#333333'}
 )
 
-# رسم التسميات والحدود لتوضيح البيانات
+# رسم التسميات
 radar.draw_range_labels(ax=ax, fontsize=10, color='#ffffff')
 radar.draw_param_labels(ax=ax, fontsize=12, color='#ffffff', fontweight='bold')
 
-# إعداد خلفية الرسم والعنوان
+# تنسيق الخلفية والعنوان
 fig.set_facecolor("#121212")
 ax.set_facecolor("#121212")
 plt.title("Player Performance Radar Chart", fontsize=16, weight='bold', color='white', pad=20)
 
 # ==========================================
-# 4. عرض المحتوى في الواجهة
+# 4. العرض في واجهة التطبيق
 # ==========================================
 col1, col2 = st.columns([3, 1])
 
@@ -85,5 +92,5 @@ with col1:
 
 with col2:
     st.subheader("صورة اللاعب")
-    st.image(fdj_cropped, caption="Frenkie de Jong", use_container_width=True)
-    st.info("💡 تحكم في أرقام اللاعب من القائمة الجانبية وسيتحدث الرسم فوراً.")
+    st.image(player_image, caption=image_caption, use_container_width=True)
+    st.info("💡 يمكنك الآن رفع أي صورة من جهازك عبر القائمة الجانبية لتظهر بجانب الرسم فوراً.")
