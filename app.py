@@ -24,10 +24,6 @@ params = [
     "Tackles Made", "Interceptions", "Recoveries", "Aerial Win %"
 ]
 
-# تعريف النطاقات الدنيا والعليا لتتطابق تماماً مع عدد المؤشرات الـ 15
-min_range = [0] * len(params)
-max_range = [99] * len(params)
-
 player_values = []
 for param in params:
     val = st.sidebar.slider(f"{param}", 0, 99, 50)
@@ -46,16 +42,13 @@ else:
     player_image = load_default_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ PyPizza Chart
+# 3. إعداد ورسم الـ PyPizza Chart (النموذج المستقر)
 # ==========================================
 slice_colors = ["#1a4f7c"] * len(params)
 text_colors = ["#ffffff"] * len(params)
 
-# تمرير النطاقات بشكل صحيح داخل PyPizza لمنع الخطأ نهائياً
 baker = PyPizza(
     params=params,
-    min_range=min_range,
-    max_range=max_range,
     straight_line_color="#222222",
     straight_line_lw=1,
     last_circle_lw=1,
@@ -63,14 +56,17 @@ baker = PyPizza(
     inner_circle_size=20
 )
 
-# إنشاء الرسم بنموذج الـ Pizza
+# الرسم بالطريقة القياسية الآمنة تماماً
 fig, ax = baker.make_pizza(
     player_values,
     figsize_square=8,
     facecolor="#313332",
     bg_color="#121212",
+    color_blank_space="same",
     slice_colors=slice_colors,
     value_colors=text_colors,
+    value_bck_colors=slice_colors,
+    blank_alpha=0.4,
     kwargs_slices=dict(edgecolor="#121212", linewidth=2, zorder=2),
     kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center")
 )
