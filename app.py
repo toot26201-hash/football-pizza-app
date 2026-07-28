@@ -17,11 +17,11 @@ st.sidebar.header("🖼️ تغيير صورة اللاعب")
 uploaded_file = st.sidebar.file_uploader("اختر صورة اللاعب (PNG أو JPG)", type=["png", "jpg", "jpeg"])
 
 st.sidebar.header("🔧 تعديل إحصائيات اللاعب")
+# تقليل عدد المؤشرات وجعل أسمائها مختصرة لعدم حدوث زحمة وتداخل
 params = [
     "Goals", "npxG", "xA", "SCA",
-    "PA Entries", "Touches/Turnover", "Prog Passes",
-    "Prog Carries", "Final 1/3 Passes", "Final 1/3 Carries", "Pressure Regains",
-    "Tackles", "Interceptions", "Recoveries", "Aerial Win %"
+    "PA Entries", "Prog Passes", "Prog Carries", 
+    "Tackles", "Interceptions", "Recoveries"
 ]
 
 low = [0] * len(params)
@@ -45,7 +45,7 @@ else:
     player_image = load_default_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ Radar (باللون الأزرق والأصفر الذهبي)
+# 3. إعداد ورسم الـ Radar بشكل مرتب وواضح
 # ==========================================
 radar = Radar(
     params, 
@@ -58,10 +58,10 @@ radar = Radar(
 
 fig, ax = radar.setup_axis(figsize=(8, 8))
 
-# رسم دوائر الخلفية بلون رمادي داكن مع حدود صفراء ذهبية خفيفة
+# رسم دوائر الخلفية
 radar.draw_circles(ax=ax, facecolor='#1e1e1e', edgecolor='#ffd700', lw=0.5)
 
-# رسم إحصائيات اللاعب باللون الأزرق (مع شفافية مناسبة)
+# رسم إحصائيات اللاعب باللون الأزرق مع حدود صفراء ذهبية
 radar.draw_radar(
     player_values, 
     ax=ax, 
@@ -69,11 +69,11 @@ radar.draw_radar(
     kwargs_rings={'facecolor': '#222222'}
 )
 
-# رسم التسميات والحدود باللون الأصفر الذهبي
-radar.draw_range_labels(ax=ax, fontsize=10, color='#ffd700')
-radar.draw_param_labels(ax=ax, fontsize=12, color='#ffd700', fontweight='bold')
+# رسم التسميات والحدود مع ضبط حجم الخط ليكون غير متداخل
+radar.draw_range_labels(ax=ax, fontsize=9, color='#ffd700')
+radar.draw_param_labels(ax=ax, fontsize=11, color='#ffd700', fontweight='bold')
 
-# تنسيق الخلفية والعنوان باللون الأصفر الذهبي
+# تنسيق الخلفية والعنوان
 fig.set_facecolor("#121212")
 ax.set_facecolor("#121212")
 plt.title("Player Performance Chart", fontsize=16, weight='bold', color='#ffd700', pad=20)
