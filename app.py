@@ -20,10 +20,6 @@ params = [
     "Tackles Made", "Interceptions", "Recoveries", "Aerial Win %"
 ]
 
-# تحديد نطاق القيم الدنيا والعليا (يجب أن تتطابق مع عدد الـ 15 مؤشر تماماً)
-min_range = [0] * len(params)
-max_range = [99] * len(params)
-
 # القوائم الجانبية لتعديل القيم بحرية
 st.sidebar.header("🔧 تعديل بيانات اللاعب")
 player_values = []
@@ -47,11 +43,9 @@ fdj_cropped = load_image()
 slice_colors = ["#1a4f7c"] * len(params)
 text_colors = ["#ffffff"] * len(params)
 
-# تمرير min_range و max_range مباشرة لتجنب أي خطأ في الأطوال
+# إنشاء كائن البايزا بالخصائص الأساسية السليمة
 baker = PyPizza(
     params=params,
-    min_range=min_range,
-    max_range=max_range,
     straight_line_color="#222222",
     straight_line_lw=1,
     last_circle_lw=1,
@@ -59,7 +53,7 @@ baker = PyPizza(
     inner_circle_size=20
 )
 
-# رسم الـ Pizza مع تضمين كافة الخصائص المطلوبة بنجاح
+# رسم الـ Pizza بالشكل الآمن والمتوافق تماماً
 fig, ax = baker.make_pizza(
     player_values,
     figsize_square=8,
@@ -67,12 +61,8 @@ fig, ax = baker.make_pizza(
     bg_color="#121212",
     slice_colors=slice_colors,
     value_colors=text_colors,
-    value_bck_colors=slice_colors,
-    blank_alpha=0.4,
     kwargs_slices=dict(edgecolor="#121212", linewidth=2, zorder=2),
-    kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center"),
-    kwargs_values=dict(color="#ffffff", fontsize=11, zorder=3,
-                       bbox=dict(edgecolor="#000000", facecolor="#1a4f7c", boxstyle="round,pad=0.2", lw=1))
+    kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center")
 )
 
 # إضافة عنوان وشرح داخل الرسم
