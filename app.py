@@ -45,7 +45,7 @@ else:
     player_image = load_default_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ Radar الآمن والمستقر
+# 3. إعداد ورسم الـ Radar (باللون الأزرق والأصفر الذهبي)
 # ==========================================
 radar = Radar(
     params, 
@@ -58,25 +58,25 @@ radar = Radar(
 
 fig, ax = radar.setup_axis(figsize=(8, 8))
 
-# رسم دوائر الخلفية
-radar.draw_circles(ax=ax, facecolor='#222222', edgecolor='#333333')
+# رسم دوائر الخلفية بلون رمادي داكن مع حدود صفراء ذهبية خفيفة
+radar.draw_circles(ax=ax, facecolor='#1e1e1e', edgecolor='#ffd700', lw=0.5)
 
-# رسم إحصائيات اللاعب
+# رسم إحصائيات اللاعب باللون الأزرق (مع شفافية مناسبة)
 radar.draw_radar(
     player_values, 
     ax=ax, 
-    kwargs_radar={'facecolor': '#1a4f7c', 'alpha': 0.6},
-    kwargs_rings={'facecolor': '#333333'}
+    kwargs_radar={'facecolor': '#1f77b4', 'alpha': 0.6, 'edgecolor': '#ffd700', 'lw': 1.5},
+    kwargs_rings={'facecolor': '#222222'}
 )
 
-# رسم التسميات والحدود
-radar.draw_range_labels(ax=ax, fontsize=10, color='#ffffff')
-radar.draw_param_labels(ax=ax, fontsize=12, color='#ffffff', fontweight='bold')
+# رسم التسميات والحدود باللون الأصفر الذهبي
+radar.draw_range_labels(ax=ax, fontsize=10, color='#ffd700')
+radar.draw_param_labels(ax=ax, fontsize=12, color='#ffd700', fontweight='bold')
 
-# تنسيق الخلفية والعنوان
+# تنسيق الخلفية والعنوان باللون الأصفر الذهبي
 fig.set_facecolor("#121212")
 ax.set_facecolor("#121212")
-plt.title("Player Performance Chart", fontsize=16, weight='bold', color='white', pad=20)
+plt.title("Player Performance Chart", fontsize=16, weight='bold', color='#ffd700', pad=20)
 
 # ==========================================
 # 4. عرض المحتوى في الواجهة
