@@ -7,7 +7,7 @@ from mplsoccer import PyPizza
 # إعداد صفحة ستريملايت لتكون بعرض واسع
 st.set_page_config(page_title="Football Player Pizza Chart", layout="wide")
 
-st.title("⚽ تطبيق تحليل أداء اللاعبين (PyPizza Model)")
+st.title("⚽ تطبيق تحليل أداء اللاعبين (PyPizza)")
 st.write("قم بتعديل إحصائيات اللاعب أو ارفع صورة جديدة من القائمة الجانبية!")
 
 # ==========================================
@@ -30,7 +30,7 @@ for param in params:
     player_values.append(val)
 
 # ==========================================
-# 2. إدارة الصورة (المرفوعة أو الافتراضية)
+# 2. إدارة الصورة
 # ==========================================
 if uploaded_file is not None:
     player_image = Image.open(uploaded_file)
@@ -42,10 +42,12 @@ else:
     player_image = load_default_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ PyPizza Chart (النموذج القياسي الآمن)
+# 3. إعداد ورسم الـ PyPizza Chart
 # ==========================================
 baker = PyPizza(
     params=params,
+    min_range=0,
+    max_range=99,
     straight_line_color="#222222",
     straight_line_lw=1,
     last_circle_lw=1,
@@ -53,7 +55,6 @@ baker = PyPizza(
     inner_circle_size=20
 )
 
-# الرسم بالطريقة القياسية الخالية من أي وسائط معقدة
 fig, ax = baker.make_pizza(
     player_values,
     figsize_square=8,
@@ -61,11 +62,11 @@ fig, ax = baker.make_pizza(
     bg_color="#121212",
     slice_colors=["#1a4f7c"] * len(params),
     value_colors=["#ffffff"] * len(params),
+    value_bck_colors=["#1a4f7c"] * len(params),
     kwargs_slices=dict(edgecolor="#121212", linewidth=2, zorder=2),
     kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center")
 )
 
-# إضافة عنوان للرسم
 fig.text(
     0.51, 0.97, "Player Performance - Pizza Chart", 
     size=18, fontweight="bold", ha="center", color="#ffffff"
