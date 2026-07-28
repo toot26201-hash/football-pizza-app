@@ -2,7 +2,7 @@ import streamlit as st
 from urllib.request import urlopen
 import matplotlib.pyplot as plt
 from PIL import Image
-from mplsoccer import PyPizza, FontManager
+from mplsoccer import PyPizza
 
 # إعداد صفحة ستريملايت لتكون بعرض واسع
 st.set_page_config(page_title="Football Player Pizza Chart", layout="wide")
@@ -28,7 +28,7 @@ for param in params:
     player_values.append(val)
 
 # ==========================================
-# 2. تحميل صورة اللاعب والصقها
+# 2. تحميل صورة اللاعب وصقها
 # ==========================================
 @st.cache_resource
 def load_image():
@@ -40,9 +40,8 @@ fdj_cropped = load_image()
 # ==========================================
 # 3. إعداد ورسم الـ Pizza Chart
 # ==========================================
-# تخصيص الألوان (شرائح مظلمة ومضيئة)
 slice_colors = ["#1a4f7c"] * len(params)
-text_colors = ["#000000"] * len(params)
+text_colors = ["#ffffff"] * len(params)
 
 baker = PyPizza(
     params=params,
@@ -55,7 +54,7 @@ baker = PyPizza(
     inner_circle_size=20
 )
 
-# إنشاء الرسم
+# إنشاء الرسم (محدث بدون الوسائط القديمة لمنع الأخطاء)
 fig, ax = baker.make_pizza(
     player_values,
     figsize_square=8,
@@ -65,9 +64,7 @@ fig, ax = baker.make_pizza(
     value_colors=text_colors,
     value_bg_colors=slice_colors,
     kwargs_slices=dict(edgecolor="#121212", linewidth=2, zorder=2),
-    kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center"),
-    kwargs_values=dict(color="#ffffff", fontsize=11, zorder=3,
-                       bbox=dict(edgecolor="#000000", facecolor="#1a4f7c", boxstyle="round,pad=0.2", lw=1))
+    kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center")
 )
 
 # إضافة عنوان وشرح داخل الرسم
@@ -85,4 +82,4 @@ with col1:
 with col2:
     st.subheader("صورة اللاعب")
     st.image(fdj_cropped, caption="Frenkie de Jong", use_column_width=True)
-    st.info("💡 يمكنك التحكم في أرقام اللاعب وإحصائياته مباشرة من القائمة الجانبية (Sidebar) في أقصى اليسار/اليمين.")
+    st.info("💡 يمكنك التحكم في أرقام اللاعب وإحصائياته مباشرة من القائمة الجانبية (Sidebar).")
