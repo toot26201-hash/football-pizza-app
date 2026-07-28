@@ -9,11 +9,14 @@ import io
 st.set_page_config(page_title="Football Player Radar Chart", layout="wide")
 
 st.title("⚽ تطبيق تحليل أداء اللاعبين")
-st.write("قم بتعديل إحصائيات اللاعب أو ارفع صورة جديدة من القائمة الجانبية، ثم حمل النتائج بسهولة!")
+st.write("قم بتعديل اسم اللاعب وإحصائياته أو ارفع صورة جديدة من القائمة الجانبية!")
 
 # ==========================================
-# 1. القائمة الجانبية (رفع الصورة + القيم)
+# 1. القائمة الجانبية (اسم اللاعب + رفع الصورة + القيم)
 # ==========================================
+st.sidebar.header("👤 بيانات اللاعب")
+player_name = st.sidebar.text_input("اسم اللاعب", "Frenkie de Jong")
+
 st.sidebar.header("🖼️ تغيير صورة اللاعب")
 uploaded_file = st.sidebar.file_uploader("اختر صورة اللاعب (PNG أو JPG)", type=["png", "jpg", "jpeg"])
 
@@ -45,7 +48,7 @@ else:
     player_image = load_default_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ Radar
+# 3. إعداد ورسم الـ Radar مع اسم اللاعب كعنوان رئيسي
 # ==========================================
 radar = Radar(
     params, 
@@ -77,10 +80,11 @@ radar.draw_radar(
 radar.draw_range_labels(ax=ax, fontsize=9, color='#ffd700')
 radar.draw_param_labels(ax=ax, fontsize=11, color='#ffd700', fontweight='bold')
 
-plt.title("Player Performance Chart", fontsize=16, weight='bold', color='#ffd700', pad=20)
+# وضع اسم اللاعب كعنوان رئيسي يظهر بوضوح في الرسم وعند الحفظ
+plt.title(f"Player Performance: {player_name}", fontsize=16, weight='bold', color='#ffd700', pad=20)
 
 # ==========================================
-# 4. عرض المحتوى وأزرار التحميل المنفصلة والواضحة
+# 4. عرض المحتوى وأزرار التحميل
 # ==========================================
 col1, col2 = st.columns([3, 1])
 
@@ -88,32 +92,30 @@ with col1:
     st.pyplot(fig)
 
 with col2:
-    st.subheader("صورة اللاعب")
+    st.subheader(f"صورة: {player_name}")
     st.image(player_image, use_container_width=True)
     
-    # زر تحميل صورة اللاعب منفصلة
+    # زر تحميل الرسم البياني (سيتضمن اسم اللاعب كعنوان بداخله تلقائياً)
+    chart_buf = io.BytesIO()
+    fig.savefig(chart_buf, format="png", dpi=300, facecolor=fig.get_facecolor(), edgecolor='none')
+    chart_buf.seek(0)
+    
+    st.download_button(
+        label="📥 تحميل الرسم مع اسم اللاعب",
+        data=chart_buf,
+        file_name=f"{player_name}_radar_chart.png",
+        mime="image/png"
+    )
+    
+    # زر تحميل الصورة منفصلة
     img_buf = io.BytesIO()
     player_image.save(img_buf, format="PNG")
     img_buf.seek(0)
     st.download_button(
         label="📥 تحميل صورة اللاعب فقط",
         data=img_buf,
-        file_name="player_image.png",
+        file_name=f"{player_name}_image.png",
         mime="image/png"
     )
     
-    st.markdown("---")
-    
-    # زر تحميل الرسم البياني منفصلاً بجودة عالية
-    chart_buf = io.BytesIO()
-    fig.savefig(chart_buf, format="png", dpi=300, facecolor=fig.get_facecolor(), edgecolor='none')
-    chart_buf.seek(0)
-    
-    st.download_button(
-        label="📥 تحميل الرسم البياني (Radar)",
-        data=chart_buf,
-        file_name="radar_chart.png",
-        mime="image/png"
-    )
-    
-    st.info("💡 تم توفير زر لتحميل الرسم البياني وزر لتحميل الصورة لضمان حصولك على أعلى جودة لكل عنصر بدون أي تداخل أو قص.")
+    st.info("💡 اكتب اسم اللاعب في القائمة الجانبية، وسيقوم التطبيق بوضعه كعنوان رئيسي للرسم وعند تحميله كصورة.")
