@@ -78,7 +78,7 @@ radar.draw_param_labels(ax=ax_radar, fontsize=11, color='#ffd700', fontweight='b
 plt.title(f"Player Performance: {player_name}", fontsize=14, weight='bold', color='#ffd700', pad=15)
 
 # ==========================================
-# 4. Match Heatmap Setup & Rendering
+# 4. Match Heatmap Setup & Rendering (Corrected)
 # ==========================================
 np.random.seed(42)
 x_coords = np.random.uniform(0, 120, 300)
@@ -88,11 +88,12 @@ pitch = Pitch(pitch_type='statsbomb', pitch_color='#aabb97', line_color='white',
 fig_heat, ax_heat = pitch.draw(figsize=(7, 5))
 fig_heat.set_facecolor("#121212")
 
-bin_statistic = pitch.bin_statistic(x_coords, y_coords, statistic='count', bins=(25, 25))
-bin_statistic['statistic'] = gaussian_filter(bin_statistic['statistic'], sigma=1)
+# حساب الهيت ماب بالطريقة المتوافقة تماماً مع أحدث إصدارات المكتبة
+bin_statistic = pitch.bin_statistic(x_coords, y_coords, statistic='count', bins=(6, 5))
+bin_statistic['statistic'] = gaussian_filter(bin_statistic['statistic'], sigma=0.9)
 
 cmap_heat = LinearSegmentedColormap.from_list("CustomHeatmap", ["#aabb97", "#ffff00", "#ffaa00", "#ff0000"], N=256)
-pcm = pitch.heatmap(bin_statistic, ax=ax_heat, cmap=cmap_heat, edgecolors=None, shading='gouraud', alpha=0.8)
+pcm = pitch.heatmap(bin_statistic, ax=ax_heat, cmap=cmap_heat, edgecolors=None, shading='auto', alpha=0.8)
 
 ax_heat.set_title(f"Match Heatmap - {player_name}", fontsize=14, weight='bold', color='#ffd700', pad=10)
 
