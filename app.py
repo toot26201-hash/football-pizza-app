@@ -2,26 +2,26 @@ import streamlit as st
 from urllib.request import urlopen
 from PIL import Image
 import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.colors import LinearSegmentedColormap
-from scipy.ndimage import gaussian_filter
-from mplsoccer import Radar, Pitch
+from mplsoccer import Radar
 import io
 
 # إعداد صفحة ستريملايت لتكون بعرض واسع
 st.set_page_config(page_title="Football Player Analysis Dashboard", layout="wide")
 
 st.title("⚽ Football Player Performance & Heatmap Dashboard")
-st.write("Customize player stats, update the player name, upload a new image from the sidebar, and analyze the charts below!")
+st.write("Customize player stats, upload player image and match heatmap from the sidebar, and download your final report!")
 
 # ==========================================
-# 1. Sidebar (Player Info, Image Upload & Stats)
+# 1. Sidebar (Player Info, Images Upload & Stats)
 # ==========================================
 st.sidebar.header("👤 Player Details")
 player_name = st.sidebar.text_input("Player Name", "Frenkie de Jong")
 
-st.sidebar.header("🖼️ Change Player Image")
-uploaded_file = st.sidebar.file_uploader("Choose player image (PNG or JPG)", type=["png", "jpg", "jpeg"])
+st.sidebar.header("🖼️ Player Image")
+uploaded_player_img = st.sidebar.file_uploader("Choose player image (PNG/JPG)", type=["png", "jpg", "jpeg"], key="player")
+
+st.sidebar.header("🔥 Match Heatmap Image")
+uploaded_heatmap_img = st.sidebar.file_uploader("Choose heatmap image (PNG/JPG)", type=["png", "jpg", "jpeg"], key="heatmap")
 
 st.sidebar.header("🔧 Edit Radar Statistics")
 params = [
@@ -39,16 +39,16 @@ for param in params:
     player_values.append(val)
 
 # ==========================================
-# 2. Image Management
+# 2. Image Management (Default vs Uploaded)
 # ==========================================
-if uploaded_file is not None:
-    player_image = Image.open(uploaded_file)
+if uploaded_player_img is not None:
+    player_image = Image.open(uploaded_player_img)
 else:
     @st.cache_resource
-    def load_default_image():
+    def load_default_player():
         URL = "https://raw.githubusercontent.com/andrewRowlinson/mplsoccer-assets/main/fdj_cropped.png"
         return Image.open(urlopen(URL))
-    player_image = load_default_image()
+    player_image = load_default_player()
 
 # ==========================================
 # 3. Radar Chart Setup & Rendering
@@ -78,27 +78,7 @@ radar.draw_param_labels(ax=ax_radar, fontsize=11, color='#ffd700', fontweight='b
 plt.title(f"Player Performance: {player_name}", fontsize=14, weight='bold', color='#ffd700', pad=15)
 
 # ==========================================
-# 4. Match Heatmap Setup & Rendering (Corrected)
-# ==========================================
-np.random.seed(42)
-x_coords = np.random.uniform(0, 120, 300)
-y_coords = np.random.uniform(0, 80, 300)
-
-pitch = Pitch(pitch_type='statsbomb', pitch_color='#aabb97', line_color='white', line_zorder=2)
-fig_heat, ax_heat = pitch.draw(figsize=(7, 5))
-fig_heat.set_facecolor("#121212")
-
-# حساب الهيت ماب بالطريقة المتوافقة تماماً مع أحدث إصدارات المكتبة
-bin_statistic = pitch.bin_statistic(x_coords, y_coords, statistic='count', bins=(6, 5))
-bin_statistic['statistic'] = gaussian_filter(bin_statistic['statistic'], sigma=0.9)
-
-cmap_heat = LinearSegmentedColormap.from_list("CustomHeatmap", ["#aabb97", "#ffff00", "#ffaa00", "#ff0000"], N=256)
-pcm = pitch.heatmap(bin_statistic, ax=ax_heat, cmap=cmap_heat, edgecolors=None, shading='auto', alpha=0.8)
-
-ax_heat.set_title(f"Match Heatmap - {player_name}", fontsize=14, weight='bold', color='#ffd700', pad=10)
-
-# ==========================================
-# 5. UI Layout & Download Buttons
+# 4. UI Layout & Download Buttons
 # ==========================================
 col1, col2 = st.columns([1, 1])
 
@@ -118,19 +98,24 @@ with col1:
 
 with col2:
     st.subheader("🔥 Match Heatmap")
-    st.pyplot(fig_heat)
-    
-    heat_buf = io.BytesIO()
-    fig_heat.savefig(heat_buf, format="png", dpi=300, facecolor=fig_heat.get_facecolor(), edgecolor='none')
-    heat_buf.seek(0)
-    st.download_button(
-        label="📥 Download Heatmap", 
-        data=heat_buf, 
-        file_name=f"{player_name}_heatmap.png", 
-        mime="image/png"
-    )
+    if uploaded_heatmap_img is not None:
+        heatmap_image = Image.open(uploaded_heatmap_img)
+        st.image(heatmap_image, use_container_width=True)
+        
+        # زر تحميل الهيت الماب المرفوع
+        heat_buf = io.BytesIO()
+        heatmap_image.save(heat_buf, format="PNG")
+        heat_buf.seek(0)
+        st.download_button(
+            label="📥 Download Heatmap Image",
+            data=heat_buf,
+            file_name=f"{player_name}_heatmap.png",
+            mime="image/png"
+        )
+    else:
+        st.info("💡 Please upload your match heatmap image from the sidebar to display it here.")
 
-# Sidebar Image Preview & Download
+# Sidebar Previews & Downloads
 st.markdown("---")
 st.sidebar.subheader("Player Image Preview")
 st.sidebar.image(player_image, use_container_width=True)
