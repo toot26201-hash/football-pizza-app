@@ -1,4 +1,4 @@
 streamlit
-mplsoccer
+mplsoccer==1.2.3
 matplotlib
 pillow
