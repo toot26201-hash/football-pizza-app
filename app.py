@@ -20,10 +20,6 @@ params = [
     "Tackles Made", "Interceptions", "Recoveries", "Aerial Win %"
 ]
 
-# إعداد نطاقات القيم الدنيا والعليا لتتطابق تماماً مع عدد المؤشرات الـ 15
-min_range = [0] * len(params)
-max_range = [99] * len(params)
-
 # القوائم الجانبية لتعديل القيم بحرية
 st.sidebar.header("🔧 تعديل بيانات اللاعب")
 player_values = []
@@ -42,15 +38,14 @@ def load_image():
 fdj_cropped = load_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ Pizza Chart (مع تمرير النطاقات بداخلها)
+# 3. إعداد ورسم الـ Pizza Chart
 # ==========================================
 slice_colors = ["#1a4f7c"] * len(params)
 text_colors = ["#ffffff"] * len(params)
 
+# إنشاء كائن البايزا بالشكل الأساسي السليم
 baker = PyPizza(
     params=params,
-    min_range=min_range,
-    max_range=max_range,
     straight_line_color="#222222",
     straight_line_lw=1,
     last_circle_lw=1,
@@ -58,7 +53,7 @@ baker = PyPizza(
     inner_circle_size=20
 )
 
-# إنشاء الرسم بالشكل الصحيح
+# رسم الـ Pizza بشكل مستقر وخالٍ من الأخطاء
 fig, ax = baker.make_pizza(
     player_values,
     figsize_square=8,
