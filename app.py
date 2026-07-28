@@ -28,7 +28,7 @@ for param in params:
     player_values.append(val)
 
 # ==========================================
-# 2. تحميل صورة اللاعب وصقها
+# 2. تحميل صورة اللاعب
 # ==========================================
 @st.cache_resource
 def load_image():
@@ -38,7 +38,7 @@ def load_image():
 fdj_cropped = load_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ Pizza Chart
+# 3. إعداد ورسم الـ Pizza Chart (نسخة مستقرة وآمنة)
 # ==========================================
 slice_colors = ["#1a4f7c"] * len(params)
 text_colors = ["#ffffff"] * len(params)
@@ -54,21 +54,23 @@ baker = PyPizza(
     inner_circle_size=20
 )
 
-# إنشاء الرسم بشكل مستقر وخالٍ من الأخطاء
+# إنشاء الرسم بالمعاملات الأساسية المدعومة تماماً
 fig, ax = baker.make_pizza(
     player_values,
-    figsize_square=8,
-    facecolor="#313332",
-    bg_color="#121212",
+    figsize=(8, 8),
     slice_colors=slice_colors,
     value_colors=text_colors,
     kwargs_slices=dict(edgecolor="#121212", linewidth=2, zorder=2),
     kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center")
 )
 
+# تعيين خلفية الرسم
+fig.set_facecolor("#121212")
+ax.set_facecolor("#121212")
+
 # إضافة عنوان وشرح داخل الرسم
 fig.text(
-    0.51, 0.97, "Frenkie de Jong - Performance Pizza Chart", 
+    0.51, 0.94, "Frenkie de Jong - Performance Pizza Chart", 
     size=18, fontweight="bold", ha="center", color="#ffffff"
 )
 
