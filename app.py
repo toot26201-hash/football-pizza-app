@@ -2,25 +2,28 @@ import streamlit as st
 from urllib.request import urlopen
 from PIL import Image
 import matplotlib.pyplot as plt
-from mplsoccer import Radar
+import numpy as np
+from matplotlib.colors import LinearSegmentedColormap
+from scipy.ndimage import gaussian_filter
+from mplsoccer import Radar, Pitch
 import io
 
 # إعداد صفحة ستريملايت لتكون بعرض واسع
-st.set_page_config(page_title="Football Player Radar Chart", layout="wide")
+st.set_page_config(page_title="Football Player Analysis Dashboard", layout="wide")
 
-st.title("⚽ تطبيق تحليل أداء اللاعبين")
-st.write("قم بتعديل اسم اللاعب وإحصائياته أو ارفع صورة جديدة من القائمة الجانبية!")
+st.title("⚽ Football Player Performance & Heatmap Dashboard")
+st.write("Customize player stats, update the player name, upload a new image from the sidebar, and analyze the charts below!")
 
 # ==========================================
-# 1. القائمة الجانبية (اسم اللاعب + رفع الصورة + القيم)
+# 1. Sidebar (Player Info, Image Upload & Stats)
 # ==========================================
-st.sidebar.header("👤 بيانات اللاعب")
-player_name = st.sidebar.text_input("اسم اللاعب", "Frenkie de Jong")
+st.sidebar.header("👤 Player Details")
+player_name = st.sidebar.text_input("Player Name", "Frenkie de Jong")
 
-st.sidebar.header("🖼️ تغيير صورة اللاعب")
-uploaded_file = st.sidebar.file_uploader("اختر صورة اللاعب (PNG أو JPG)", type=["png", "jpg", "jpeg"])
+st.sidebar.header("🖼️ Change Player Image")
+uploaded_file = st.sidebar.file_uploader("Choose player image (PNG or JPG)", type=["png", "jpg", "jpeg"])
 
-st.sidebar.header("🔧 تعديل إحصائيات اللاعب")
+st.sidebar.header("🔧 Edit Radar Statistics")
 params = [
     "Goals", "npxG", "xA", "Decision Making", 
     "Crosses", "Corner Quality", "Prog Passes", 
@@ -36,7 +39,7 @@ for param in params:
     player_values.append(val)
 
 # ==========================================
-# 2. إدارة الصورة
+# 2. Image Management
 # ==========================================
 if uploaded_file is not None:
     player_image = Image.open(uploaded_file)
@@ -48,7 +51,7 @@ else:
     player_image = load_default_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ Radar مع اسم اللاعب كعنوان رئيسي
+# 3. Radar Chart Setup & Rendering
 # ==========================================
 radar = Radar(
     params, 
@@ -59,63 +62,84 @@ radar = Radar(
     ring_width=1
 )
 
-fig, ax = radar.setup_axis(figsize=(8, 8))
+fig_radar, ax_radar = radar.setup_axis(figsize=(7, 7))
+fig_radar.set_facecolor("#121212")
+ax_radar.set_facecolor("#121212")
 
-# تنسيق الخلفية
-fig.set_facecolor("#121212")
-ax.set_facecolor("#121212")
-
-# رسم دوائر الخلفية
-radar.draw_circles(ax=ax, facecolor='#1e1e1e', edgecolor='#ffd700', lw=0.5)
-
-# رسم إحصائيات اللاعب (أزرق من الداخل وحافة حمراء)
+radar.draw_circles(ax=ax_radar, facecolor='#1e1e1e', edgecolor='#ffd700', lw=0.5)
 radar.draw_radar(
     player_values, 
-    ax=ax, 
+    ax=ax_radar, 
     kwargs_radar={'facecolor': '#1f77b4', 'alpha': 0.6, 'edgecolor': '#ff4d4d', 'lw': 2.5},
     kwargs_rings={'facecolor': '#222222'}
 )
-
-# رسم التسميات والحدود
-radar.draw_range_labels(ax=ax, fontsize=9, color='#ffd700')
-radar.draw_param_labels(ax=ax, fontsize=11, color='#ffd700', fontweight='bold')
-
-# وضع اسم اللاعب كعنوان رئيسي يظهر بوضوح في الرسم وعند الحفظ
-plt.title(f"Player Performance: {player_name}", fontsize=16, weight='bold', color='#ffd700', pad=20)
+radar.draw_range_labels(ax=ax_radar, fontsize=9, color='#ffd700')
+radar.draw_param_labels(ax=ax_radar, fontsize=11, color='#ffd700', fontweight='bold')
+plt.title(f"Player Performance: {player_name}", fontsize=14, weight='bold', color='#ffd700', pad=15)
 
 # ==========================================
-# 4. عرض المحتوى وأزرار التحميل
+# 4. Match Heatmap Setup & Rendering
 # ==========================================
-col1, col2 = st.columns([3, 1])
+np.random.seed(42)
+x_coords = np.random.uniform(0, 120, 300)
+y_coords = np.random.uniform(0, 80, 300)
+
+pitch = Pitch(pitch_type='statsbomb', pitch_color='#aabb97', line_color='white', line_zorder=2)
+fig_heat, ax_heat = pitch.draw(figsize=(7, 5))
+fig_heat.set_facecolor("#121212")
+
+bin_statistic = pitch.bin_statistic(x_coords, y_coords, statistic='count', bins=(25, 25))
+bin_statistic['statistic'] = gaussian_filter(bin_statistic['statistic'], sigma=1)
+
+cmap_heat = LinearSegmentedColormap.from_list("CustomHeatmap", ["#aabb97", "#ffff00", "#ffaa00", "#ff0000"], N=256)
+pcm = pitch.heatmap(bin_statistic, ax=ax_heat, cmap=cmap_heat, edgecolors=None, shading='gouraud', alpha=0.8)
+
+ax_heat.set_title(f"Match Heatmap - {player_name}", fontsize=14, weight='bold', color='#ffd700', pad=10)
+
+# ==========================================
+# 5. UI Layout & Download Buttons
+# ==========================================
+col1, col2 = st.columns([1, 1])
 
 with col1:
-    st.pyplot(fig)
+    st.subheader("📊 Performance Radar")
+    st.pyplot(fig_radar)
+    
+    radar_buf = io.BytesIO()
+    fig_radar.savefig(radar_buf, format="png", dpi=300, facecolor=fig_radar.get_facecolor(), edgecolor='none')
+    radar_buf.seek(0)
+    st.download_button(
+        label="📥 Download Radar Chart", 
+        data=radar_buf, 
+        file_name=f"{player_name}_radar.png", 
+        mime="image/png"
+    )
 
 with col2:
-    st.subheader(f"صورة: {player_name}")
-    st.image(player_image, use_container_width=True)
+    st.subheader("🔥 Match Heatmap")
+    st.pyplot(fig_heat)
     
-    # زر تحميل الرسم البياني (سيتضمن اسم اللاعب كعنوان بداخله تلقائياً)
-    chart_buf = io.BytesIO()
-    fig.savefig(chart_buf, format="png", dpi=300, facecolor=fig.get_facecolor(), edgecolor='none')
-    chart_buf.seek(0)
-    
+    heat_buf = io.BytesIO()
+    fig_heat.savefig(heat_buf, format="png", dpi=300, facecolor=fig_heat.get_facecolor(), edgecolor='none')
+    heat_buf.seek(0)
     st.download_button(
-        label="📥 تحميل الرسم مع اسم اللاعب",
-        data=chart_buf,
-        file_name=f"{player_name}_radar_chart.png",
+        label="📥 Download Heatmap", 
+        data=heat_buf, 
+        file_name=f"{player_name}_heatmap.png", 
         mime="image/png"
     )
-    
-    # زر تحميل الصورة منفصلة
-    img_buf = io.BytesIO()
-    player_image.save(img_buf, format="PNG")
-    img_buf.seek(0)
-    st.download_button(
-        label="📥 تحميل صورة اللاعب فقط",
-        data=img_buf,
-        file_name=f"{player_name}_image.png",
-        mime="image/png"
-    )
-    
-    st.info("💡 اكتب اسم اللاعب في القائمة الجانبية، وسيقوم التطبيق بوضعه كعنوان رئيسي للرسم وعند تحميله كصورة.")
+
+# Sidebar Image Preview & Download
+st.markdown("---")
+st.sidebar.subheader("Player Image Preview")
+st.sidebar.image(player_image, use_container_width=True)
+
+img_buf = io.BytesIO()
+player_image.save(img_buf, format="PNG")
+img_buf.seek(0)
+st.sidebar.download_button(
+    label="📥 Download Player Image",
+    data=img_buf,
+    file_name=f"{player_name}_image.png",
+    mime="image/png"
+)
