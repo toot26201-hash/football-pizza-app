@@ -1,24 +1,28 @@
 import streamlit as st
 from urllib.request import urlopen
-import matplotlib.pyplot as plt
 from PIL import Image
-from mplsoccer import PyPizza
+import matplotlib.pyplot as plt
+from mplsoccer import Radar
 
 # إعداد صفحة ستريملايت لتكون بعرض واسع
-st.set_page_config(page_title="Football Player Pizza Chart", layout="wide")
+st.set_page_config(page_title="Football Player Radar Chart", layout="wide")
 
-st.title("⚽ تطبيق تحليل أداء اللاعبين (Streamlit + mplsoccer)")
+st.title("⚽ تطبيق تحليل أداء اللاعبين (Radar Chart)")
 st.write("قم بتعديل قيم اللاعب من القائمة الجانبية وشاهد التغيير فوراً في الرسم البياني!")
 
 # ==========================================
 # 1. إعداد البيانات والمعلمات (Params & Values)
 # ==========================================
 params = [
-    "Non-Penalty Goals", "npxG", "xA", "Open Play SCA",
-    "Penalty Area Entries", "Touches per Turnover", "Progressive Passes",
-    "Progressive Carries", "Final 1/3 Passes", "Final 1/3 Carries", "Pressure Regains",
-    "Tackles Made", "Interceptions", "Recoveries", "Aerial Win %"
+    "Goals", "npxG", "xA", "SCA",
+    "PA Entries", "Touches/Turnover", "Prog Passes",
+    "Prog Carries", "Final 1/3 Passes", "Final 1/3 Carries", "Pressure Regains",
+    "Tackles", "Interceptions", "Recoveries", "Aerial Win %"
 ]
+
+# إعداد الحدود الدنيا والعليا لكل مؤشر
+low = [0] * len(params)
+high = [99] * len(params)
 
 # القوائم الجانبية لتعديل القيم بحرية
 st.sidebar.header("🔧 تعديل بيانات اللاعب")
@@ -38,40 +42,38 @@ def load_image():
 fdj_cropped = load_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ Pizza Chart
+# 3. إعداد ورسم الـ Radar الآمن والخالي من الأخطاء
 # ==========================================
-slice_colors = ["#1a4f7c"] * len(params)
-text_colors = ["#ffffff"] * len(params)
-
-# إنشاء كائن البايزا بالخصائص الأساسية السليمة
-baker = PyPizza(
-    params=params,
-    straight_line_color="#222222",
-    straight_line_lw=1,
-    last_circle_lw=1,
-    other_circle_lw=0,
-    inner_circle_size=20
+radar = Radar(
+    params, 
+    low, 
+    high,
+    round_int=[False] * len(params),
+    num_rings=4, 
+    ring_width=1
 )
 
-# رسم الـ Pizza بالشكل الآمن والمتوافق تماماً
-fig, ax = baker.make_pizza(
-    player_values,
-    figsize_square=8,
-    facecolor="#313332",
-    bg_color="#121212",
-    slice_colors=slice_colors,
-    value_colors=text_colors,
-    kwargs_slices=dict(edgecolor="#121212", linewidth=2, zorder=2),
-    kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center")
+fig, ax = radar.setup_axis(figsize=(8, 8))
+
+# رسم الإحصائيات
+radar.draw_radar(
+    player_values, 
+    ax=ax, 
+    facecolor='#1a4f7c', 
+    alpha=0.6
 )
 
-# إضافة عنوان وشرح داخل الرسم
-fig.text(
-    0.51, 0.97, "Frenkie de Jong - Performance Pizza Chart", 
-    size=18, fontweight="bold", ha="center", color="#ffffff"
-)
+# رسم دوائر الخلفية
+radar.draw_circles(ax=ax, facecolor='#222222', edgecolor='#333333')
 
-# عرض الرسم داخل تطبيق ستريملايت
+# إعداد خلفية الرسم والعنوان
+fig.set_facecolor("#121212")
+ax.set_facecolor("#121212")
+plt.title("Player Performance Radar Chart", fontsize=16, weight='bold', color='white', pad=20)
+
+# ==========================================
+# 4. عرض المحتوى في الواجهة
+# ==========================================
 col1, col2 = st.columns([3, 1])
 
 with col1:
@@ -80,4 +82,4 @@ with col1:
 with col2:
     st.subheader("صورة اللاعب")
     st.image(fdj_cropped, caption="Frenkie de Jong", use_container_width=True)
-    st.info("💡 يمكنك التحكم في أرقام اللاعب وإحصائياته مباشرة من القائمة الجانبية (Sidebar).")
+    st.info("💡 تحكم في أرقام اللاعب من القائمة الجانبية وسيتحدث الرسم فوراً.")
