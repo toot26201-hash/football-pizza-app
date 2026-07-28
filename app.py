@@ -54,7 +54,7 @@ baker = PyPizza(
     inner_circle_size=20
 )
 
-# إنشاء الرسم (محدث بدون الوسائط القديمة لمنع الأخطاء)
+# إنشاء الرسم بشكل مستقر وخالٍ من الأخطاء
 fig, ax = baker.make_pizza(
     player_values,
     figsize_square=8,
@@ -62,7 +62,7 @@ fig, ax = baker.make_pizza(
     bg_color="#121212",
     slice_colors=slice_colors,
     value_colors=text_colors,
-    value_bg_colors=slice_colors,
+    value_bck_colors=slice_colors,
     kwargs_slices=dict(edgecolor="#121212", linewidth=2, zorder=2),
     kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center")
 )
