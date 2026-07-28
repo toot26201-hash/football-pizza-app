@@ -8,7 +8,7 @@ from mplsoccer import Radar
 st.set_page_config(page_title="Football Player Radar Chart", layout="wide")
 
 st.title("⚽ تطبيق تحليل أداء اللاعبين")
-st.write("قم بتعديل إحصائيات اللاعب أو ارفع صورة جديدة من القائمة الجانبية!")
+st.write("قم بتعديل إحصائيات اللاعب (بما فيها اتخاذ القرارات والكروسات والركنيات) أو ارفع صورة جديدة من القائمة الجانبية!")
 
 # ==========================================
 # 1. القائمة الجانبية (رفع الصورة + القيم)
@@ -17,10 +17,11 @@ st.sidebar.header("🖼️ تغيير صورة اللاعب")
 uploaded_file = st.sidebar.file_uploader("اختر صورة اللاعب (PNG أو JPG)", type=["png", "jpg", "jpeg"])
 
 st.sidebar.header("🔧 تعديل إحصائيات اللاعب")
+# إضافة المؤشرات الجديدة (اتخاذ القرارات، الكروسات، جودة الركنيات) مع الحفاظ على التوازن
 params = [
-    "Goals", "npxG", "xA", "SCA",
-    "PA Entries", "Prog Passes", "Prog Carries", 
-    "Tackles", "Interceptions", "Recoveries"
+    "Goals", "npxG", "xA", "Decision Making", 
+    "Crosses", "Corner Quality", "Prog Passes", 
+    "Prog Carries", "Tackles", "Recoveries"
 ]
 
 low = [0] * len(params)
@@ -44,7 +45,7 @@ else:
     player_image = load_default_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ Radar (حافة حمراء للخط المتغير)
+# 3. إعداد ورسم الـ Radar
 # ==========================================
 radar = Radar(
     params, 
@@ -60,7 +61,7 @@ fig, ax = radar.setup_axis(figsize=(8, 8))
 # رسم دوائر الخلفية
 radar.draw_circles(ax=ax, facecolor='#1e1e1e', edgecolor='#ffd700', lw=0.5)
 
-# رسم إحصائيات اللاعب: لون داخلي أزرق مع حافة باللون الأحمر ('#ff4d4d')
+# رسم إحصائيات اللاعب: لون داخلي أزرق مع حافة حمراء للخط المتغير
 radar.draw_radar(
     player_values, 
     ax=ax, 
@@ -88,4 +89,4 @@ with col1:
 with col2:
     st.subheader("صورة اللاعب")
     st.image(player_image, use_container_width=True)
-    st.info("💡 يمكنك رفع أي صورة جديدة وستظهر مباشرة هنا وفي التطبيق.")
+    st.info("💡 يمكنك التحكم في مؤشرات (Decision Making, Crosses, Corner Quality) وغيرها مباشرة من القائمة الجانبية.")
