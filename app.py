@@ -9,7 +9,7 @@ import io
 st.set_page_config(page_title="Football Player Radar Chart", layout="wide")
 
 st.title("⚽ تطبيق تحليل أداء اللاعبين")
-st.write("قم بتعديل إحصائيات اللاعب أو ارفع صورة جديدة من القائمة الجانبية، ثم حمل النتيجة نهائياً!")
+st.write("قم بتعديل إحصائيات اللاعب أو ارفع صورة جديدة من القائمة الجانبية، ثم حمل النتائج بسهولة!")
 
 # ==========================================
 # 1. القائمة الجانبية (رفع الصورة + القيم)
@@ -45,7 +45,7 @@ else:
     player_image = load_default_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ Radar مع دمج صورة اللاعب داخله
+# 3. إعداد ورسم الـ Radar
 # ==========================================
 radar = Radar(
     params, 
@@ -79,16 +79,8 @@ radar.draw_param_labels(ax=ax, fontsize=11, color='#ffd700', fontweight='bold')
 
 plt.title("Player Performance Chart", fontsize=16, weight='bold', color='#ffd700', pad=20)
 
-# ------------------------------------------
-# دمج صورة اللاعب داخل مساحة الرسم (تظهر عند الحفظ)
-# ------------------------------------------
-# إضافة الصورة في الزاوية العليا للرسم
-ax_image = fig.add_axes([0.80, 0.80, 0.15, 0.15]) # [left, bottom, width, height]
-ax_image.imshow(player_image)
-ax_image.axis('off')
-
 # ==========================================
-# 4. عرض المحتوى وتوفير زر التحميل المباشر
+# 4. عرض المحتوى وأزرار التحميل المنفصلة والواضحة
 # ==========================================
 col1, col2 = st.columns([3, 1])
 
@@ -96,18 +88,32 @@ with col1:
     st.pyplot(fig)
 
 with col2:
-    st.subheader("معاينة وصورة اللاعب")
+    st.subheader("صورة اللاعب")
     st.image(player_image, use_container_width=True)
     
-    # تجهيز زر تحميل الصورة لكي يتم حفظ الرسم مع صورة اللاعب معاً
-    buf = io.BytesIO()
-    fig.savefig(buf, format="png", dpi=300, facecolor=fig.get_facecolor(), edgecolor='none')
-    buf.seek(0)
-    
+    # زر تحميل صورة اللاعب منفصلة
+    img_buf = io.BytesIO()
+    player_image.save(img_buf, format="PNG")
+    img_buf.seek(0)
     st.download_button(
-        label="📥 تحميل الرسم مع الصورة كـ PNG",
-        data=buf,
-        file_name="player_radar_chart.png",
+        label="📥 تحميل صورة اللاعب فقط",
+        data=img_buf,
+        file_name="player_image.png",
         mime="image/png"
     )
-    st.info("💡 زر التحميل هذا يضمن حفظ الرسم البياني وصورة اللاعب معاً في ملف واحد.")
+    
+    st.markdown("---")
+    
+    # زر تحميل الرسم البياني منفصلاً بجودة عالية
+    chart_buf = io.BytesIO()
+    fig.savefig(chart_buf, format="png", dpi=300, facecolor=fig.get_facecolor(), edgecolor='none')
+    chart_buf.seek(0)
+    
+    st.download_button(
+        label="📥 تحميل الرسم البياني (Radar)",
+        data=chart_buf,
+        file_name="radar_chart.png",
+        mime="image/png"
+    )
+    
+    st.info("💡 تم توفير زر لتحميل الرسم البياني وزر لتحميل الصورة لضمان حصولك على أعلى جودة لكل عنصر بدون أي تداخل أو قص.")
