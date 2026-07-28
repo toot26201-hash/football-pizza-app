@@ -18,10 +18,10 @@ uploaded_file = st.sidebar.file_uploader("اختر صورة اللاعب (PNG أ
 
 st.sidebar.header("🔧 تعديل إحصائيات اللاعب")
 params = [
-    "Non-Penalty Goals", "npxG", "xA", "Open Play SCA",
-    "Penalty Area Entries", "Touches per Turnover", "Progressive Passes",
-    "Progressive Carries", "Final 1/3 Passes", "Final 1/3 Carries", "Pressure Regains",
-    "Tackles Made", "Interceptions", "Recoveries", "Aerial Win %"
+    "Goals", "npxG", "xA", "SCA",
+    "PA Entries", "Touches/Turnover", "Prog Passes",
+    "Prog Carries", "Final 1/3 Passes", "Final 1/3 Carries", "Pressure Regains",
+    "Tackles", "Interceptions", "Recoveries", "Aerial Win %"
 ]
 
 player_values = []
@@ -42,11 +42,8 @@ else:
     player_image = load_default_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ PyPizza Chart (النموذج المستقر)
+# 3. إعداد ورسم الـ PyPizza Chart (النموذج القياسي الآمن)
 # ==========================================
-slice_colors = ["#1a4f7c"] * len(params)
-text_colors = ["#ffffff"] * len(params)
-
 baker = PyPizza(
     params=params,
     straight_line_color="#222222",
@@ -56,17 +53,14 @@ baker = PyPizza(
     inner_circle_size=20
 )
 
-# الرسم بالطريقة القياسية الآمنة تماماً
+# الرسم بالطريقة القياسية الخالية من أي وسائط معقدة
 fig, ax = baker.make_pizza(
     player_values,
     figsize_square=8,
     facecolor="#313332",
     bg_color="#121212",
-    color_blank_space="same",
-    slice_colors=slice_colors,
-    value_colors=text_colors,
-    value_bck_colors=slice_colors,
-    blank_alpha=0.4,
+    slice_colors=["#1a4f7c"] * len(params),
+    value_colors=["#ffffff"] * len(params),
     kwargs_slices=dict(edgecolor="#121212", linewidth=2, zorder=2),
     kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center")
 )
