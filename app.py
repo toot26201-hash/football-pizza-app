@@ -42,12 +42,13 @@ else:
     player_image = load_default_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ PyPizza Chart
+# 3. إعداد ورسم الـ PyPizza Chart (النسخة المتوافقة الحديثة)
 # ==========================================
 baker = PyPizza(
     params=params,
     min_range=0,
     max_range=99,
+    background_color="#121212",
     straight_line_color="#222222",
     straight_line_lw=1,
     last_circle_lw=1,
@@ -55,18 +56,19 @@ baker = PyPizza(
     inner_circle_size=20
 )
 
+# رسم الشكل بالطريقة المعيارية الجديدة تماماً التي لا تسبب أي تعارض
 fig, ax = baker.make_pizza(
     player_values,
-    figsize_square=8,
-    facecolor="#313332",
-    bg_color="#121212",
+    figsize=(8, 8),
     slice_colors=["#1a4f7c"] * len(params),
     value_colors=["#ffffff"] * len(params),
     value_bck_colors=["#1a4f7c"] * len(params),
-    kwargs_slices=dict(edgecolor="#121212", linewidth=2, zorder=2),
-    kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center")
+    kwargs_slices=dict(edgecolor="#121212", linewidth=2),
+    kwargs_params=dict(color="#ffffff", fontsize=11, fontweight="bold", va="center"),
+    kwargs_values=dict(color="#ffffff", fontsize=11, zorder=3)
 )
 
+# إضافة عنوان للرسم
 fig.text(
     0.51, 0.97, "Player Performance - Pizza Chart", 
     size=18, fontweight="bold", ha="center", color="#ffffff"
