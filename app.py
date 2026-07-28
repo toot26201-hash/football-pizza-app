@@ -42,7 +42,7 @@ def load_image():
 fdj_cropped = load_image()
 
 # ==========================================
-# 3. إعداد ورسم الـ Radar الآمن والخالي من الأخطاء
+# 3. إعداد ورسم الـ Radar بالشكل الصحيح 100%
 # ==========================================
 radar = Radar(
     params, 
@@ -55,16 +55,20 @@ radar = Radar(
 
 fig, ax = radar.setup_axis(figsize=(8, 8))
 
-# رسم الإحصائيات
+# رسم دوائر الخلفية
+radar.draw_circles(ax=ax, facecolor='#222222', edgecolor='#333333')
+
+# رسم الإحصائيات بالطريقة الصحيحة عبر kwargs_radar
 radar.draw_radar(
     player_values, 
     ax=ax, 
-    facecolor='#1a4f7c', 
-    alpha=0.6
+    kwargs_radar={'facecolor': '#1a4f7c', 'alpha': 0.6},
+    kwargs_rings={'facecolor': '#333333'}
 )
 
-# رسم دوائر الخلفية
-radar.draw_circles(ax=ax, facecolor='#222222', edgecolor='#333333')
+# رسم التسميات والحدود لتوضيح البيانات
+radar.draw_range_labels(ax=ax, fontsize=10, color='#ffffff')
+radar.draw_param_labels(ax=ax, fontsize=12, color='#ffffff', fontweight='bold')
 
 # إعداد خلفية الرسم والعنوان
 fig.set_facecolor("#121212")
