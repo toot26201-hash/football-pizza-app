@@ -4,11 +4,12 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from mplsoccer import Radar
 import io
+import os
 
 # إعداد صفحة ستريملايت لتكون بعرض واسع
-st.set_page_config(page_title="Football Player Analysis Dashboard", layout="wide")
+st.set_page_config(page_title="TootScouting Dashboard", layout="wide")
 
-st.title("⚽ Football Player Performance & Metrics Dashboard")
+st.title("⚽ TootScouting - Player Performance & Metrics Dashboard")
 st.write("Manage player data, radar charts, match heatmaps, and standalone individual metrics from the tabs below!")
 
 # ==========================================
@@ -24,7 +25,7 @@ st.sidebar.header("🔥 Match Heatmap Image")
 uploaded_heatmap_img = st.sidebar.file_uploader("Choose heatmap image (PNG/JPG)", type=["png", "jpg", "jpeg"], key="heatmap")
 
 # ==========================================
-# 2. إدارة الصورة
+# 2. إدارة الصور (اللاعب + اللوجو)
 # ==========================================
 if uploaded_player_img is not None:
     player_image = Image.open(uploaded_player_img)
@@ -35,8 +36,17 @@ else:
         return Image.open(urlopen(URL))
     player_image = load_default_player()
 
+# تحميل اللوجو الخاص بالهوية (تأكد أن اسم الملف logo.png في نفس المجلد)
+@st.cache_resource
+def load_logo():
+    if os.path.exists("logo.png"):
+        return Image.open("logo.png")
+    return None
+
+logo_image = load_logo()
+
 # ==========================================
-# 3. تقسيم الواجهة إلى تبويبات (Tabs) لتنصيف الفرديات وحدها
+# 3. تقسيم الواجهة إلى تبويبات (Tabs)
 # ==========================================
 tab1, tab2 = st.tabs(["📊 Radar & Heatmap", "🎯 Standalone Individual Metrics"])
 
@@ -44,7 +54,6 @@ tab1, tab2 = st.tabs(["📊 Radar & Heatmap", "🎯 Standalone Individual Metric
 with tab1:
     st.header(f"Performance Analysis for {player_name}")
     
-    # إحصائيات الرادار الأساسية
     radar_params = [
         "Goals", "npxG", "xA", "Decision Making", 
         "Crosses", "Corner Quality", "Prog Passes", 
@@ -54,7 +63,6 @@ with tab1:
     st.subheader("Configure Radar Statistics (Sidebar Sliders)")
     player_values = []
     
-    # تنظيم السلايدر الخاص بالرادار في أعمدة
     cols = st.columns(2)
     for i, param in enumerate(radar_params):
         with cols[i % 2]:
@@ -86,6 +94,12 @@ with tab1:
     radar.draw_param_labels(ax=ax_radar, fontsize=11, color='#ffd700', fontweight='bold')
     plt.title(f"Player Performance: {player_name}", fontsize=14, weight='bold', color='#ffd700', pad=15)
 
+    # إضافة اللوجو بشكل صغير أسفل الرادار إذا كان موجوداً
+    if logo_image is not None:
+        ax_logo = fig_radar.add_axes([0.40, 0.02, 0.20, 0.08]) # [left, bottom, width, height]
+        ax_logo.imshow(logo_image)
+        ax_logo.axis('off')
+
     c1, c2 = st.columns([1, 1])
     with c1:
         st.subheader("📊 Performance Radar")
@@ -114,7 +128,6 @@ with tab2:
     st.header(f"🎯 Standalone Individual Metrics Assessment: {player_name}")
     st.write("This section evaluates standalone player metrics (Technical, Physical, and Tactical) independent of the charts.")
 
-    # تعريف المقياس الفردي المستقل
     ind_metrics = {
         "Key Passes": 75,
         "Successful Dribbles %": 65,
@@ -129,7 +142,6 @@ with tab2:
     ind_values = {}
     col_a, col_b = st.columns(2)
     
-    # عرض المؤشرات الفردية في لوحة مستقلة تماماً
     i = 0
     for metric, default_val in ind_metrics.items():
         target_col = col_a if i % 2 == 0 else col_b
@@ -140,12 +152,10 @@ with tab2:
     st.markdown("---")
     st.subheader("📋 Individual Metrics Summary Report")
     
-    # عرض النتائج في جدول مرتب
     import pandas as pd
     df_metrics = pd.DataFrame(list(ind_values.items()), columns=["Individual Metric", "Score / Rating"])
     st.dataframe(df_metrics, use_container_width=True)
 
-    # زر تحميل تقرير الفرديات كملف CSV أو نصي
     csv_data = df_metrics.to_csv(index=False).encode('utf-8')
     st.download_button(
         label="📥 Download Individual Metrics Report (CSV)",
@@ -154,7 +164,11 @@ with tab2:
         mime="text/csv"
     )
 
-# معاينة صورة اللاعب في القائمة الجانبية
+# معاينة صورة اللاعب واللوجو في القائمة الجانبية
 st.markdown("---")
 st.sidebar.subheader("Player Image Preview")
 st.sidebar.image(player_image, use_container_width=True)
+
+if logo_image is not None:
+    st.sidebar.subheader("Brand Logo")
+    st.sidebar.image(logo_image, width=100)
